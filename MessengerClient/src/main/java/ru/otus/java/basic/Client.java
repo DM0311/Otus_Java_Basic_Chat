@@ -1,0 +1,99 @@
+package ru.otus.java.basic;
+
+import lombok.Getter;
+import lombok.Setter;
+import ru.otus.java.basic.commands.Commands;
+import ru.otus.java.basic.handlres.MessageHandler;
+import ru.otus.java.basic.model.Message;
+import ru.otus.java.basic.processors.InputTextProcessor;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+import java.util.Scanner;
+
+public class Client {
+    Socket socket = new Socket("localhost", 8090);
+    DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+    DataInputStream in = new DataInputStream(socket.getInputStream());
+    @Getter
+    String userName;
+    @Getter
+    @Setter
+    boolean isActive = true;
+    boolean isAuthenticated;
+    MessageHandler messageHandler = new MessageHandler();
+
+    public Client() throws IOException {
+        Scanner scanner = new Scanner(System.in);
+        try {
+            new Thread(() -> {
+                try {
+                    while (isActive) {
+                        Message message = Message.parseMessage(in.readUTF());
+                        if (message.getToUserName() != null) {
+                            userName = message.getToUserName();
+                            isAuthenticated = true;
+                        }
+                        messageHandler.processMessage(message, this);
+                        if (!isActive) {
+                            scanner.close();
+                            break;
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    disconnect();
+                }
+            }).start();
+
+            while (isActive) {
+                String inputText = scanner.nextLine();
+                Message message = InputTextProcessor.processInput(inputText, isAuthenticated);
+                message.setFromUserName(userName);
+                out.writeUTF(message.serializeMessage());
+                if (message.getCommand().equals(Commands.EXIT)) {
+                    break;
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void disconnect() {
+
+        try {
+            if (in != null) {
+                in.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+
+        try {
+            if (out != null) {
+                out.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            throw new RuntimeException(e);
+        }
+
+        try {
+            if (socket != null) {
+                socket.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            throw new RuntimeException(e);
+        }
+
+    }
+}

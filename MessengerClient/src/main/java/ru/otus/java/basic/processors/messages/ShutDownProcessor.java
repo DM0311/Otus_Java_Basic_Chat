@@ -1,0 +1,15 @@
+package ru.otus.java.basic.processors.messages;
+
+import ru.otus.java.basic.Client;
+import ru.otus.java.basic.model.Message;
+import ru.otus.java.basic.utils.Printer;
+
+public class ShutDownProcessor implements MessageProcessor {
+
+
+    @Override
+    public void process(Message message, Client client) {
+        Printer.printMessage(message);
+        client.setActive(false);
+    }
+}
