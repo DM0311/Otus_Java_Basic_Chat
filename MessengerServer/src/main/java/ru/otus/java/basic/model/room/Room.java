@@ -10,6 +10,7 @@ import java.util.Map;
 public class Room {
     @Getter
     private String roomName;
+    @Getter
     private String roomPassword;
     @Getter
     private String owner;
@@ -22,12 +23,12 @@ public class Room {
         this.members = new HashMap<>();
     }
 
-    public String enterRoom(User newUser, String password) {
+    public boolean enterRoom(User newUser, String password) {
         if (!password.equals(roomPassword)) {
-            return null;
+            return false;
         }
         members.put(newUser.getUsername(), newUser);
-        return roomName;
+        return true;
     }
 
     public boolean exitRoom(User user){

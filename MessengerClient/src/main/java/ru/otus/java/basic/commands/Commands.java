@@ -17,6 +17,9 @@ public enum Commands {
     UNSUPPORTED("/unsupported", 0),
     ACTIVE_USERS("/active", 0),
     CHANGE_NICK("/change_nick", 1),
+    ROOMS_LIST("/list", 0),
+    CREATE_ROOM("/create", 2),
+    ENTER_ROOM("/enter", 2),
     DEFAULT("/default", 0);
 
     @Getter

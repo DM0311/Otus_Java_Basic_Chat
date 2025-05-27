@@ -23,6 +23,9 @@ public class MessageHandler {
         messageProcessors.put(Commands.DIRECT_MESSAGE, new DirectMessageProcessor());
         messageProcessors.put(Commands.CHANGE_NICK, new ChangeNickProcessor());
         messageProcessors.put(Commands.BROADCAST_MESSAGE, new BroadcastMessageProcessor());
+        messageProcessors.put(Commands.ROOMS_LIST, new GetRoomsProcessor());
+        messageProcessors.put(Commands.CREATE_ROOM, new CreateRoomProcessor());
+        messageProcessors.put(Commands.ENTER_ROOM, new EnterRoomProcessor());
     }
 
     public void processMessage(Message message, ClientHandler clientHandler) {

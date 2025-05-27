@@ -44,11 +44,17 @@ public class InputTextProcessor {
             }
             partCounter++;
         }
-
-        if (msg.getCommand().getNumberOfParams() != msg.getParameters().size()) {
-            msg.setCommand(Commands.UNSUPPORTED);
-            return msg;
+        switch (msg.getCommand()){
+            case CREATE_ROOM, ENTER_ROOM -> {if (msg.getCommand().getNumberOfParams() <1) {
+                msg.setCommand(Commands.UNSUPPORTED);
+                return msg;
+            }}
+            default -> {if (msg.getCommand().getNumberOfParams() != msg.getParameters().size()) {
+                msg.setCommand(Commands.UNSUPPORTED);
+                return msg;
+            }}
         }
+
         msg.setText(messageText.toString());
         return msg;
     }

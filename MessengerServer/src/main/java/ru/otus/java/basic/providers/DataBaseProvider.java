@@ -127,10 +127,10 @@ public class DataBaseProvider {
         try {
             PreparedStatement ps = connection.prepareStatement("update console_chat.users as u set user_name = ? where u.user_name = ?");
             ps.setString(1, newUserName);
-            ps.setString(2,oldUserName);
+            ps.setString(2, oldUserName);
             int rowsNum = ps.executeUpdate();
-            if (rowsNum>0) {
-                log.info("Пользователь {} сменил имя на {}",oldUserName,newUserName);
+            if (rowsNum > 0) {
+                log.info("Пользователь {} сменил имя на {}", oldUserName, newUserName);
                 return true;
             } else {
                 return false;
@@ -141,7 +141,7 @@ public class DataBaseProvider {
         }
     }
 
-    public List<Room> getRooms(){
+    public List<Room> getRooms() {
         List<Room> rooms = new ArrayList<>();
         try {
             PreparedStatement ps = connection.prepareStatement("select * from console_chat.rooms r");
@@ -150,9 +150,26 @@ public class DataBaseProvider {
                 String roomName = rs.getString(1);
                 String owner = rs.getString(2);
                 String pwd = rs.getString(3);
-                rooms.add(new Room(roomName,pwd,owner));
+                rooms.add(new Room(roomName, pwd, owner));
             }
+            log.info("Сохранено комнат: {}", rooms.size());
             return rooms;
+        } catch (SQLException e) {
+            log.error("Runtime exception", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean addRoom(Room newRoom) {
+        try {
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO console_chat.rooms (name, owner, pwd) VALUES (?, ?, ?)");
+            ps.setString(1, newRoom.getRoomName());
+            ps.setString(2, newRoom.getOwner());
+            ps.setString(3, newRoom.getRoomPassword());
+            int rs = ps.executeUpdate();
+            log.info("Создана комната: {}", newRoom.getRoomName());
+            return true;
+
         } catch (SQLException e) {
             log.error("Runtime exception", e);
             throw new RuntimeException(e);

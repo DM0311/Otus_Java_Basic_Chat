@@ -49,4 +49,12 @@ public class RoomProvider {
         activeRooms.remove(roomName);
         return usersToDefaultRoom;
     }
+
+    public List<String> getActiveRooms(){
+        return activeRooms.keySet().stream().toList();
+    }
+
+    public boolean hasRoom(String roomName){
+        return activeRooms.containsKey(roomName);
+    }
 }

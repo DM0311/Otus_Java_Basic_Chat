@@ -25,6 +25,8 @@ public class AuthProcessor implements MessageProcessor {
     @Override
     public void process(Message message, ClientHandler clientHandler) {
 
+        String defaultRoomName = "Default";
+
         clientHandler.getUser().setLogin(message.getParameters().get(0));
         clientHandler.getUser().setPassword(message.getParameters().get(1));
         boolean isAuthenticated = dataBaseProvider.authenticateUser(clientHandler.getUser());
@@ -32,13 +34,13 @@ public class AuthProcessor implements MessageProcessor {
         Message responseMsg = new Message();
         responseMsg.setFromUserName("SERVER");
         if(isAuthenticated){
-            Room defaultRoom = roomProvider.getRoom("Default");
-            String roomName = defaultRoom.enterRoom(clientHandler.getUser(),"");
+            Room defaultRoom = roomProvider.getRoom(defaultRoomName);
+            defaultRoom.enterRoom(clientHandler.getUser()," ");
             responseMsg.setText("Успешная авторизация. Вы попали в общий чат c именем "
                     +clientHandler.getUser().getUsername()
                     +".");
             responseMsg.setToUserName(clientHandler.getUser().getUsername());
-            responseMsg.setRoomName(roomName);
+            responseMsg.setRoomName(defaultRoomName);
             clientHandler.setAuthenticated(true);
             activeUsersProvider.addClient(clientHandler.getUser().getUsername(),clientHandler);
         }else {
