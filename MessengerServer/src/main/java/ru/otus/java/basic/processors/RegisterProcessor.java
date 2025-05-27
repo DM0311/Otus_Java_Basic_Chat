@@ -1,12 +1,10 @@
 package ru.otus.java.basic.processors;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import ru.otus.java.basic.commands.Commands;
-import ru.otus.java.basic.providers.ActiveUsersProvider;
-import ru.otus.java.basic.providers.DataBaseProvider;
 import ru.otus.java.basic.handlers.ClientHandler;
 import ru.otus.java.basic.model.Message;
+import ru.otus.java.basic.providers.ActiveUsersProvider;
+import ru.otus.java.basic.providers.DataBaseProvider;
+import ru.otus.java.basic.utils.MessageSerializer;
 
 import java.time.Instant;
 
@@ -22,10 +20,8 @@ public class RegisterProcessor implements MessageProcessor {
     @Override
     public void process(Message message, ClientHandler clientHandler) {
 
-        Gson gson = new GsonBuilder().serializeNulls().create();
         Message responseMsg = new Message();
         responseMsg.setFromUserName("SERVER");
-
         String password = message.getParameters().get(1);
 
         if (password.length() < 4) {
@@ -40,7 +36,7 @@ public class RegisterProcessor implements MessageProcessor {
                 responseMsg.setText("Успешная регистрация. Вы авторизованы и попали в общий чат.");
                 responseMsg.setToUserName(clientHandler.getUser().getUsername());
                 clientHandler.setAuthenticated(true);
-                activeUsersProvider.addClient(clientHandler.getUser().getUsername(),clientHandler);
+                activeUsersProvider.addClient(clientHandler.getUser().getUsername(), clientHandler);
             } else {
                 if (clientHandler.getUser().getUsername() == null) {
                     responseMsg.setText("Такое имя пользователя уже занято. Придумайте длругое имя.");
@@ -51,6 +47,6 @@ public class RegisterProcessor implements MessageProcessor {
         }
         Instant instant = Instant.now();
         responseMsg.setTimeStamp(instant.getEpochSecond());
-        clientHandler.sendMsg(gson.toJson(responseMsg));
+        clientHandler.sendMsg(MessageSerializer.serialize(responseMsg));
     }
 }

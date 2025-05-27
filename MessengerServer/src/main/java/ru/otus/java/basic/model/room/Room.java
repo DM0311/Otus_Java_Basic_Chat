@@ -1,6 +1,7 @@
 package ru.otus.java.basic.model.room;
 
 import lombok.Getter;
+import lombok.Setter;
 import ru.otus.java.basic.model.user.User;
 
 import java.util.HashMap;
@@ -15,6 +16,9 @@ public class Room {
     @Getter
     private String owner;
     private Map<String, User> members;
+    @Getter
+    @Setter
+    private Long lastActivity;
 
     public Room(String roomName, String roomPassword, String owner) {
         this.roomName = roomName;

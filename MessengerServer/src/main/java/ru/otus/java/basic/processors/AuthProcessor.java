@@ -1,13 +1,12 @@
 package ru.otus.java.basic.processors;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import ru.otus.java.basic.model.room.Room;
 import ru.otus.java.basic.providers.ActiveUsersProvider;
 import ru.otus.java.basic.providers.DataBaseProvider;
 import ru.otus.java.basic.handlers.ClientHandler;
 import ru.otus.java.basic.model.Message;
 import ru.otus.java.basic.providers.RoomProvider;
+import ru.otus.java.basic.utils.MessageSerializer;
 
 import java.time.Instant;
 
@@ -30,7 +29,6 @@ public class AuthProcessor implements MessageProcessor {
         clientHandler.getUser().setLogin(message.getParameters().get(0));
         clientHandler.getUser().setPassword(message.getParameters().get(1));
         boolean isAuthenticated = dataBaseProvider.authenticateUser(clientHandler.getUser());
-        Gson gson = new GsonBuilder().serializeNulls().create();
         Message responseMsg = new Message();
         responseMsg.setFromUserName("SERVER");
         if(isAuthenticated){
@@ -48,7 +46,7 @@ public class AuthProcessor implements MessageProcessor {
         }
         Instant instant = Instant.now();
         responseMsg.setTimeStamp(instant.getEpochSecond());
-        clientHandler.sendMsg(gson.toJson(responseMsg));
+        clientHandler.sendMsg(MessageSerializer.serialize(responseMsg));
     }
 
 }

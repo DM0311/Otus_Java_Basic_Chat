@@ -113,6 +113,7 @@ public class ClientHandler implements Runnable {
 
             while (working && isAuthenticated) {
                 Message message = Message.parseMessage(in.readUTF());
+                user.setLastActivity(message.getTimeStamp());
                 messageHandler.processMessage(message, this);
             }
 

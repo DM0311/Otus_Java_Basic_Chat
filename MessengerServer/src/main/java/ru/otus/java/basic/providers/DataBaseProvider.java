@@ -2,6 +2,7 @@ package ru.otus.java.basic.providers;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ru.otus.java.basic.model.Message;
 import ru.otus.java.basic.model.room.Room;
 import ru.otus.java.basic.model.user.Role;
 import ru.otus.java.basic.model.user.User;
@@ -9,7 +10,6 @@ import ru.otus.java.basic.model.user.User;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.SimpleTimeZone;
 
 public class DataBaseProvider {
 
@@ -150,7 +150,10 @@ public class DataBaseProvider {
                 String roomName = rs.getString(1);
                 String owner = rs.getString(2);
                 String pwd = rs.getString(3);
-                rooms.add(new Room(roomName, pwd, owner));
+                Long lastActivity = rs.getLong(4);
+                Room r = new Room(roomName, pwd, owner);
+                r.setLastActivity(lastActivity);
+                rooms.add(r);
             }
             log.info("Сохранено комнат: {}", rooms.size());
             return rooms;
@@ -162,11 +165,13 @@ public class DataBaseProvider {
 
     public boolean addRoom(Room newRoom) {
         try {
-            PreparedStatement ps = connection.prepareStatement("INSERT INTO console_chat.rooms (name, owner, pwd) VALUES (?, ?, ?)");
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO console_chat.rooms " +
+                    "(name, owner, pwd, last_activity) VALUES (?, ?, ?, ?)");
             ps.setString(1, newRoom.getRoomName());
             ps.setString(2, newRoom.getOwner());
             ps.setString(3, newRoom.getRoomPassword());
-            int rs = ps.executeUpdate();
+            ps.setLong(4,newRoom.getLastActivity());
+            ps.executeUpdate();
             log.info("Создана комната: {}", newRoom.getRoomName());
             return true;
 
@@ -174,5 +179,44 @@ public class DataBaseProvider {
             log.error("Runtime exception", e);
             throw new RuntimeException(e);
         }
+    }
+
+    public void archiveMessage(Message msg) {
+        try {
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO console_chat.room_history (room_name, time_stamp, message_text, from_user) VALUES (?, ?, ?, ?)");
+            ps.setString(1, msg.getRoomName());
+            ps.setLong(2, msg.getTimeStamp());
+            ps.setString(3, msg.getText());
+            ps.setString(4, msg.getFromUserName());
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            log.error("Runtime exception", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<Message> getLastMsgInRoom(String roomName) {
+        List<Message> messages = new ArrayList<>();
+        try {
+            PreparedStatement ps = connection.prepareStatement("SELECT *\n" +
+                    "FROM console_chat.room_history ch where room_name = ? \n" +
+                    "ORDER BY ch.\"time_stamp\" ASC\n" +
+                    "LIMIT 10;");
+            ps.setString(1, roomName);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()){
+                Message msg = new Message();
+                msg.setRoomName(roomName);
+                msg.setTimeStamp(rs.getLong(2));
+                msg.setText(rs.getString(3));
+                msg.setFromUserName(rs.getString(4));
+                messages.add(msg);
+            }
+        } catch (SQLException e) {
+            log.error("Runtime exception", e);
+            throw new RuntimeException(e);
+        }
+        return messages;
     }
 }

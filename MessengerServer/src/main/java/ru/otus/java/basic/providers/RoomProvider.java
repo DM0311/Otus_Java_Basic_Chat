@@ -3,7 +3,6 @@ package ru.otus.java.basic.providers;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.otus.java.basic.model.room.Room;
-import ru.otus.java.basic.model.user.User;
 
 import java.util.Collections;
 import java.util.List;
@@ -56,5 +55,9 @@ public class RoomProvider {
 
     public boolean hasRoom(String roomName){
         return activeRooms.containsKey(roomName);
+    }
+
+    public void checkRooms(){
+
     }
 }

@@ -4,7 +4,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.otus.java.basic.handlers.ClientHandler;
 
-import java.util.ArrayList;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.chrono.ChronoZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,7 +45,6 @@ public class ActiveUsersProvider {
     }
 
     public void removeClient(String userName){
-        activeUsers.get(userName).disconnect();
         activeUsers.remove(userName);
     }
 
@@ -50,9 +53,6 @@ public class ActiveUsersProvider {
     }
 
     public void removeAllClients(){
-        for(ClientHandler handler : activeUsers.values()){
-            handler.disconnect();
-        }
         activeUsers.clear();
     }
 
@@ -62,5 +62,17 @@ public class ActiveUsersProvider {
 
     public boolean hasClient(String userName){
         return activeUsers.containsKey(userName);
+    }
+
+    public void checkUsers(){
+        activeUsers.values().forEach(element ->{
+            String userName = element.getUser().getUsername();
+            Instant timeStampWithLag = Instant.now().minus(20, ChronoUnit.MINUTES);
+            Instant lastActivity = Instant.ofEpochSecond(element.getUser().getLastActivity());
+            if(timeStampWithLag.isAfter(lastActivity)){
+                activeUsers.get(userName).disconnect();
+                activeUsers.remove(userName);
+            }
+        });
     }
 }

@@ -49,6 +49,7 @@ public class Client {
                         }
                     }
                 } catch (IOException e) {
+                    System.out.println("___FFF___");
                     e.printStackTrace();
                 } finally {
                     disconnect();
@@ -56,6 +57,7 @@ public class Client {
             }).start();
 
             while (isActive) {
+
                 String inputText = scanner.nextLine();
                 Message message = InputTextProcessor.processInput(inputText, isAuthenticated);
                 message.setFromUserName(userName);
@@ -67,7 +69,9 @@ public class Client {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            if (!isActive) {
+                e.printStackTrace();
+            }
         }
     }
 
