@@ -5,25 +5,20 @@ import com.google.gson.GsonBuilder;
 import ru.otus.java.basic.handlers.ClientHandler;
 import ru.otus.java.basic.model.Message;
 import ru.otus.java.basic.providers.ActiveUsersProvider;
-import ru.otus.java.basic.providers.RoomProvider;
 
-public class ChatMessageProcessor implements MessageProcessor {
+public class BroadcastMessageProcessor implements MessageProcessor {
     ActiveUsersProvider activeUsersProvider;
-    RoomProvider roomProvider;
 
-    public ChatMessageProcessor() {
+    public BroadcastMessageProcessor() {
         this.activeUsersProvider = ActiveUsersProvider.getInstance();
-        this.roomProvider = RoomProvider.getInstance();
     }
 
     @Override
     public void process(Message message, ClientHandler clientHandler) {
 
         Gson gson = new GsonBuilder().serializeNulls().create();
-        for(String userName : roomProvider.getRoom(message.getRoomName()).getMembers()){
-            if(activeUsersProvider.hasClient(userName)){
-                activeUsersProvider.getClient(userName).sendMsg(gson.toJson(message));
-            };
+        for(ClientHandler handler : activeUsersProvider.getAllClients()){
+            handler.sendMsg(gson.toJson(message));
         }
 
 

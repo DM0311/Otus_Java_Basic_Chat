@@ -9,13 +9,14 @@ public enum Commands {
     AUTH("/auth", 2),
     REGISTER("/register", 3),
     EXIT("/exit", 0),
-    DIRECT_MESSAGE("/w", 2),
+    DIRECT_MESSAGE("/w", 1),
     BROADCAST_MESSAGE("/b", 0),
     CHAT_MESSAGE("/ch", 0),
     BAN("/kick", 1),
     SHUT_DOWN("/shut_down", 0),
     ACTIVE_USERS("/active", 0),
     UNSUPPORTED("/unsupported", 0),
+    CHANGE_NICK("/change_nick", 1),
     DEFAULT("/default", 0);
 
     @Getter

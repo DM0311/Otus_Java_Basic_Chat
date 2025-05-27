@@ -20,6 +20,9 @@ public class MessageHandler {
         messageProcessors.put(Commands.CHAT_MESSAGE, new ChatMessageProcessor());
         messageProcessors.put(Commands.SHUT_DOWN, new ShutDownProcessor());
         messageProcessors.put(Commands.ACTIVE_USERS, new GetActiveUsersProcessor());
+        messageProcessors.put(Commands.DIRECT_MESSAGE, new DirectMessageProcessor());
+        messageProcessors.put(Commands.CHANGE_NICK, new ChangeNickProcessor());
+        messageProcessors.put(Commands.BROADCAST_MESSAGE, new BroadcastMessageProcessor());
     }
 
     public void processMessage(Message message, ClientHandler clientHandler) {

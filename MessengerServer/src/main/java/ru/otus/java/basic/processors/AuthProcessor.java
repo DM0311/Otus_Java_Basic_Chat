@@ -2,21 +2,24 @@ package ru.otus.java.basic.processors;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import ru.otus.java.basic.commands.Commands;
+import ru.otus.java.basic.model.room.Room;
 import ru.otus.java.basic.providers.ActiveUsersProvider;
 import ru.otus.java.basic.providers.DataBaseProvider;
 import ru.otus.java.basic.handlers.ClientHandler;
 import ru.otus.java.basic.model.Message;
+import ru.otus.java.basic.providers.RoomProvider;
 
 import java.time.Instant;
 
 public class AuthProcessor implements MessageProcessor {
     DataBaseProvider dataBaseProvider;
     ActiveUsersProvider activeUsersProvider;
+    RoomProvider roomProvider;
 
     public AuthProcessor() {
         this.dataBaseProvider = DataBaseProvider.getInstance();
         this.activeUsersProvider = ActiveUsersProvider.getInstance();
+        this.roomProvider = RoomProvider.getInstance();
     }
 
     @Override
@@ -29,8 +32,13 @@ public class AuthProcessor implements MessageProcessor {
         Message responseMsg = new Message();
         responseMsg.setFromUserName("SERVER");
         if(isAuthenticated){
-            responseMsg.setText("Успешная авторизация. Вы попали в общий чат.");
+            Room defaultRoom = roomProvider.getRoom("Default");
+            String roomName = defaultRoom.enterRoom(clientHandler.getUser(),"");
+            responseMsg.setText("Успешная авторизация. Вы попали в общий чат c именем "
+                    +clientHandler.getUser().getUsername()
+                    +".");
             responseMsg.setToUserName(clientHandler.getUser().getUsername());
+            responseMsg.setRoomName(roomName);
             clientHandler.setAuthenticated(true);
             activeUsersProvider.addClient(clientHandler.getUser().getUsername(),clientHandler);
         }else {

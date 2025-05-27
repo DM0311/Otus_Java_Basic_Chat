@@ -11,7 +11,7 @@ import java.util.List;
 public class Message {
     private Long timeStamp;
     private String fromUserName;
-    private Long chatId;
+    private String roomName;
     private String toUserName;
     private Commands command;
     private List<String> parameters = new ArrayList<>();

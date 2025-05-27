@@ -2,10 +2,14 @@ package ru.otus.java.basic.providers;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ru.otus.java.basic.model.room.Room;
 import ru.otus.java.basic.model.user.Role;
 import ru.otus.java.basic.model.user.User;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.SimpleTimeZone;
 
 public class DataBaseProvider {
 
@@ -97,6 +101,58 @@ public class DataBaseProvider {
                     return false;
                 }
             }
+        } catch (SQLException e) {
+            log.error("Runtime exception", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean nickIsUsed(String userName) {
+        try {
+            PreparedStatement ps = connection.prepareStatement("select u.user_name from console_chat.users u where u.user_name = ?");
+            ps.setString(1, userName);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (SQLException e) {
+            log.error("Runtime exception", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean changeNick(String oldUserName, String newUserName) {
+        try {
+            PreparedStatement ps = connection.prepareStatement("update console_chat.users as u set user_name = ? where u.user_name = ?");
+            ps.setString(1, newUserName);
+            ps.setString(2,oldUserName);
+            int rowsNum = ps.executeUpdate();
+            if (rowsNum>0) {
+                log.info("Пользователь {} сменил имя на {}",oldUserName,newUserName);
+                return true;
+            } else {
+                return false;
+            }
+        } catch (SQLException e) {
+            log.error("Runtime exception", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<Room> getRooms(){
+        List<Room> rooms = new ArrayList<>();
+        try {
+            PreparedStatement ps = connection.prepareStatement("select * from console_chat.rooms r");
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                String roomName = rs.getString(1);
+                String owner = rs.getString(2);
+                String pwd = rs.getString(3);
+                rooms.add(new Room(roomName,pwd,owner));
+            }
+            return rooms;
         } catch (SQLException e) {
             log.error("Runtime exception", e);
             throw new RuntimeException(e);

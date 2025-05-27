@@ -31,7 +31,6 @@ public class ShutDownProcessor implements MessageProcessor {
             for(ClientHandler client : activeUsersProvider.getAllClients()){
                 client.sendMsg(gson.toJson(responseMsg));
                 client.setWorking(false);
-                client.disconnect();
             }
             activeUsersProvider.removeAllClients();
             clientHandler.getServer().shutDown();

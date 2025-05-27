@@ -20,13 +20,17 @@ public class Client {
     @Getter
     String userName;
     @Getter
+    String currentRoomName;
+    @Getter
     @Setter
     boolean isActive = true;
     boolean isAuthenticated;
-    MessageHandler messageHandler = new MessageHandler();
+    MessageHandler messageHandler;
+    Scanner scanner;
 
     public Client() throws IOException {
-        Scanner scanner = new Scanner(System.in);
+        this.messageHandler = new MessageHandler();
+        this.scanner = new Scanner(System.in);
         try {
             new Thread(() -> {
                 try {
@@ -36,9 +40,11 @@ public class Client {
                             userName = message.getToUserName();
                             isAuthenticated = true;
                         }
+                        if (message.getRoomName() != null) {
+                            currentRoomName = message.getRoomName();
+                        }
                         messageHandler.processMessage(message, this);
                         if (!isActive) {
-                            scanner.close();
                             break;
                         }
                     }
@@ -53,6 +59,7 @@ public class Client {
                 String inputText = scanner.nextLine();
                 Message message = InputTextProcessor.processInput(inputText, isAuthenticated);
                 message.setFromUserName(userName);
+                message.setRoomName(currentRoomName);
                 out.writeUTF(message.serializeMessage());
                 if (message.getCommand().equals(Commands.EXIT)) {
                     break;
@@ -65,6 +72,7 @@ public class Client {
     }
 
     public void disconnect() {
+
 
         try {
             if (in != null) {
@@ -92,6 +100,12 @@ public class Client {
         } catch (IOException e) {
             e.printStackTrace();
 
+            throw new RuntimeException(e);
+        }
+
+        try {
+            System.in.close();
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
 

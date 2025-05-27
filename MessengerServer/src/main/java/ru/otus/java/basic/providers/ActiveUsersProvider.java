@@ -22,7 +22,7 @@ public class ActiveUsersProvider {
     public static ActiveUsersProvider getInstance() {
         ActiveUsersProvider localInstance = instance;
         if (localInstance == null) {
-            synchronized (DataBaseProvider.class) {
+            synchronized (ActiveUsersProvider.class) {
                 localInstance = instance;
                 if (localInstance == null) {
                     instance = localInstance = new ActiveUsersProvider();
@@ -41,6 +41,7 @@ public class ActiveUsersProvider {
     }
 
     public void removeClient(String userName){
+        activeUsers.get(userName).disconnect();
         activeUsers.remove(userName);
     }
 
@@ -57,5 +58,9 @@ public class ActiveUsersProvider {
 
     public List<String> getActiveUsers(){
         return activeUsers.keySet().stream().toList();
+    }
+
+    public boolean hasClient(String userName){
+        return activeUsers.containsKey(userName);
     }
 }
