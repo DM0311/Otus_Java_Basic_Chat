@@ -10,6 +10,7 @@ public class ExitProcessor implements MessageProcessor {
 
     @Override
     public void process(Message message, Client client) {
+        Printer.printMessage(message);
         client.setActive(false);
     }
 }

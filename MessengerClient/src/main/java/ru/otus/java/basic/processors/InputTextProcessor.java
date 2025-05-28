@@ -45,7 +45,7 @@ public class InputTextProcessor {
             partCounter++;
         }
         switch (msg.getCommand()){
-            case CREATE_ROOM, ENTER_ROOM -> {if (msg.getCommand().getNumberOfParams() <1) {
+            case CREATE_ROOM, ENTER_ROOM, BAN -> {if (msg.getCommand().getNumberOfParams() <1) {
                 msg.setCommand(Commands.UNSUPPORTED);
                 return msg;
             }}

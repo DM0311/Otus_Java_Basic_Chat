@@ -42,7 +42,7 @@ public class AuthProcessor implements MessageProcessor {
             clientHandler.setAuthenticated(true);
             activeUsersProvider.addClient(clientHandler.getUser().getUsername(),clientHandler);
         }else {
-            responseMsg.setText("Некорректный логин или пароль. Попробуйте еще раз");
+            responseMsg.setText("Некорректный логин/пароль или Вы были забанены администратором.");
         }
         Instant instant = Instant.now();
         responseMsg.setTimeStamp(instant.getEpochSecond());

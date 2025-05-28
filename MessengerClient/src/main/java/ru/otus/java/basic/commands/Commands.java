@@ -12,7 +12,8 @@ public enum Commands {
     DIRECT_MESSAGE("/w", 1),
     BROADCAST_MESSAGE("/b", 0),
     CHAT_MESSAGE("/ch", 0),
-    BAN("/kick", 1),
+    // /ban UserName n - ban for n minutes, no_parameters = permanent ban
+    BAN("/ban", 2),
     SHUT_DOWN("/shut_down", 0),
     UNSUPPORTED("/unsupported", 0),
     ACTIVE_USERS("/active", 0),
@@ -20,6 +21,7 @@ public enum Commands {
     ROOMS_LIST("/list", 0),
     CREATE_ROOM("/create", 2),
     ENTER_ROOM("/enter", 2),
+    LAST_ACTIVITY("/last_activity", 1),
     DEFAULT("/default", 0);
 
     @Getter

@@ -4,10 +4,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.otus.java.basic.model.room.Room;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 public class RoomProvider {
     private static volatile RoomProvider instance;
@@ -57,7 +61,25 @@ public class RoomProvider {
         return activeRooms.containsKey(roomName);
     }
 
-    public void checkRooms(){
+    public List<String> checkRoomsActivity(){
+        List<String> inactiveRoomNames = new ArrayList<>();
+        Instant now = Instant.now();
+        for(Room r : activeRooms.values()){
+            Instant lastActivity = Instant.ofEpochSecond(r.getLastActivity());
+            if(now.minus(7, ChronoUnit.DAYS).isAfter(lastActivity)){
+                inactiveRoomNames.add(r.getRoomName());
+            }
+        }
+        return inactiveRoomNames;
+    }
 
+    public int getOwnedRooms(String ownerName){
+        int counter =0;
+        for(Room r : activeRooms.values()){
+            if(r.getOwner().equals(ownerName)){
+                counter++;
+            }
+        }
+        return counter;
     }
 }

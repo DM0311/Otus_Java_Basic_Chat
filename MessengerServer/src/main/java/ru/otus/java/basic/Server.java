@@ -11,6 +11,7 @@ import ru.otus.java.basic.providers.RoomProvider;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -42,8 +43,18 @@ public class Server {
     }
 
     public void start() {
-        serviceTasksExecutor.scheduleAtFixedRate(()->{activeUsersProvider.checkUsers();},20,5, TimeUnit.MINUTES);
-        //serviceTasksExecutor.scheduleAtFixedRate(()->{},20,5, TimeUnit.MINUTES);
+        serviceTasksExecutor.scheduleAtFixedRate(() -> {
+            activeUsersProvider.checkUsers();
+            List<String> inactiveRooms = roomProvider.checkRoomsActivity();
+            for (String element : inactiveRooms) {
+                if(element.equals("Default")){
+                    continue;
+                }
+                dataBaseProvider.deleteRoom(roomProvider.getRoom(element));
+                roomProvider.deleteRoom(element);
+            }
+        }, 20, 5, TimeUnit.MINUTES);
+
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             this.serverSocket = serverSocket;
             log.info("Сервер запущен на порту " + port);

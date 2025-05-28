@@ -8,6 +8,8 @@ import ru.otus.java.basic.model.user.Role;
 import ru.otus.java.basic.model.user.User;
 
 import java.sql.*;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,16 +85,23 @@ public class DataBaseProvider {
     public boolean authenticateUser(User user) {
         try {
             PreparedStatement ps = connection.prepareStatement("select u.password, u.user_name, " +
-                    "u.role from console_chat.users u where u.login = ?");
+                    "u.role, u.isbanned, u.ban_time, u.last_activity from console_chat.users u where u.login = ?");
             ps.setString(1, user.getLogin());
             ResultSet rs = ps.executeQuery();
-            if (rs.next() == false) {
+            if (!rs.next()) {
                 user.setUsername(null);
                 return false;
             } else {
                 String password = rs.getString(1);
                 String username = rs.getString(2);
                 String role = rs.getString(3);
+                boolean isBanned = rs.getBoolean(4);
+                int minutes = rs.getInt(5);
+                Instant ts = Instant.ofEpochSecond(rs.getLong(6));
+                if(isBanned || ts.plus(minutes, ChronoUnit.MINUTES).isAfter(Instant.now())){
+                    return false;
+                }
+
                 if (user.getPassword().equals(password)) {
                     user.setUsername(username);
                     user.setRole(Role.enumForValue(role));
@@ -101,6 +110,53 @@ public class DataBaseProvider {
                     return false;
                 }
             }
+        } catch (SQLException e) {
+            log.error("Runtime exception", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public long getLastActivity(User user) {
+        try {
+            PreparedStatement ps = connection.prepareStatement("select u.last_activity from console_chat.users u " +
+                    "where u.user_name = ?");
+            ps.setString(1, user.getUsername());
+            ResultSet rs = ps.executeQuery();
+            if (!rs.next()) {
+                return 0L;
+            } else {
+                return rs.getLong(1);
+            }
+        } catch (SQLException e) {
+            log.error("Runtime exception", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void banUser(String username, int minutes) {
+        try {
+            PreparedStatement ps = connection.prepareStatement("update console_chat.users as u set isbanned  = ?, ban_time = ?  where u.user_name = ?");
+            if (minutes == 0){
+                ps.setBoolean(1, true);
+                ps.setInt(2,0);
+            }else {
+                ps.setBoolean(1, false);
+                ps.setInt(2,minutes);
+            }
+            ps.setString(3, username);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            log.error("Runtime exception", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void setLastActivity(User user) {
+        try {
+            PreparedStatement ps = connection.prepareStatement("update console_chat.users as u set last_activity = ? where u.user_name = ?");
+            ps.setLong(1, user.getLastActivity());
+            ps.setString(2, user.getUsername());
+            ps.executeUpdate();
         } catch (SQLException e) {
             log.error("Runtime exception", e);
             throw new RuntimeException(e);
@@ -170,9 +226,23 @@ public class DataBaseProvider {
             ps.setString(1, newRoom.getRoomName());
             ps.setString(2, newRoom.getOwner());
             ps.setString(3, newRoom.getRoomPassword());
-            ps.setLong(4,newRoom.getLastActivity());
+            ps.setLong(4, newRoom.getLastActivity());
             ps.executeUpdate();
             log.info("Создана комната: {}", newRoom.getRoomName());
+            return true;
+
+        } catch (SQLException e) {
+            log.error("Runtime exception", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean deleteRoom(Room r) {
+        try {
+            PreparedStatement ps = connection.prepareStatement("delete from console_chat.rooms r where name = ?");
+            ps.setString(1, r.getRoomName());
+            ps.executeUpdate();
+            log.info("Удалена комната: {}", r.getRoomName());
             return true;
 
         } catch (SQLException e) {
@@ -205,7 +275,7 @@ public class DataBaseProvider {
                     "LIMIT 10;");
             ps.setString(1, roomName);
             ResultSet rs = ps.executeQuery();
-            while (rs.next()){
+            while (rs.next()) {
                 Message msg = new Message();
                 msg.setRoomName(roomName);
                 msg.setTimeStamp(rs.getLong(2));

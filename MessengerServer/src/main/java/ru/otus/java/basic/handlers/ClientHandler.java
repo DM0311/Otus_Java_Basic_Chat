@@ -16,6 +16,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.time.Instant;
+import java.util.NoSuchElementException;
 
 
 public class ClientHandler implements Runnable {
@@ -117,8 +118,11 @@ public class ClientHandler implements Runnable {
                 messageHandler.processMessage(message, this);
             }
 
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException | NoSuchElementException e) {
+            if(working){
+                e.printStackTrace();
+            }
+
         } finally {
             disconnect();
         }

@@ -28,7 +28,9 @@ public class CreateRoomProcessor implements MessageProcessor {
         String roomPassword = message.getParameters().size() > 1 ? message.getParameters().get(1) : " ";
         if(roomProvider.hasRoom(roomName)){
             responseMsg.setText("Невозможно создать комнату - такое имя уже занято");
-        }else{
+        } else if (roomProvider.getOwnedRooms(message.getFromUserName())>5) {
+            responseMsg.setText("Невозможно создать более 5 комнат");
+        } else{
             Room r = new Room(roomName, roomPassword, clientHandler.getUser().getUsername());
             r.setLastActivity(instant.getEpochSecond());
             roomProvider.addRoom(r);

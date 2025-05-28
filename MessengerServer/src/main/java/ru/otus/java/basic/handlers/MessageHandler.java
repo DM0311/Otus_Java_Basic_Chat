@@ -26,6 +26,8 @@ public class MessageHandler {
         messageProcessors.put(Commands.ROOMS_LIST, new GetRoomsProcessor());
         messageProcessors.put(Commands.CREATE_ROOM, new CreateRoomProcessor());
         messageProcessors.put(Commands.ENTER_ROOM, new EnterRoomProcessor());
+        messageProcessors.put(Commands.BAN, new BanProcessor());
+        messageProcessors.put(Commands.LAST_ACTIVITY, new LastActivityProcessor());
     }
 
     public void processMessage(Message message, ClientHandler clientHandler) {

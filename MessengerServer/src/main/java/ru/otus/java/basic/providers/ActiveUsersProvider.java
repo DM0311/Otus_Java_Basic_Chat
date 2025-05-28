@@ -2,7 +2,10 @@ package ru.otus.java.basic.providers;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ru.otus.java.basic.commands.Commands;
 import ru.otus.java.basic.handlers.ClientHandler;
+import ru.otus.java.basic.model.Message;
+import ru.otus.java.basic.utils.MessageSerializer;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -70,7 +73,11 @@ public class ActiveUsersProvider {
             Instant timeStampWithLag = Instant.now().minus(20, ChronoUnit.MINUTES);
             Instant lastActivity = Instant.ofEpochSecond(element.getUser().getLastActivity());
             if(timeStampWithLag.isAfter(lastActivity)){
-                activeUsers.get(userName).disconnect();
+                Message msg = new Message();
+                msg.setFromUserName("SERVER");
+                msg.setCommand(Commands.EXIT);
+                activeUsers.get(userName).sendMsg(MessageSerializer.serialize(msg));
+                activeUsers.get(userName).setWorking(false);
                 activeUsers.remove(userName);
             }
         });

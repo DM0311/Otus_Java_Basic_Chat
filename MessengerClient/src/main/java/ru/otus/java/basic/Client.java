@@ -49,7 +49,6 @@ public class Client {
                         }
                     }
                 } catch (IOException e) {
-                    System.out.println("___FFF___");
                     e.printStackTrace();
                 } finally {
                     disconnect();
@@ -69,7 +68,7 @@ public class Client {
             }
 
         } catch (Exception e) {
-            if (!isActive) {
+            if (isActive) {
                 e.printStackTrace();
             }
         }
